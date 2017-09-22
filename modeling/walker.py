@@ -44,8 +44,8 @@ class Flow(object):
 
     def trace(self, route):
         step = self.step
-        for case in route:
-            self.log(step, step.user, case)
+        for label, case in route:
+            self.log(step, step.user, label)
             step = step.run(case)
         return step
 
@@ -53,10 +53,10 @@ class Flow(object):
         step = step or self.step
         route = route or []
         tt = False
-        for case in step.form.iter_cases(priority):
+        for label, case in step.form.iter_cases(priority):
             if tt:
                 step = self.trace(route)
-            self.log(step, step.user, case)
+            self.log(step, step.user, label)
             try:
                 new_step = step.run(case)
             except StepError as e:
@@ -67,7 +67,7 @@ class Flow(object):
                 print('=' * 40)
                 tt = True
             else:
-                route.append(case)
+                route.append((label, case))
                 self.graph.append((step, new_step))
                 self.walk(new_step, route, priority)
                 tt = True
