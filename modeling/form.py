@@ -1,7 +1,7 @@
 # coding: utf-8
 """Form
 """
-from itertools import tee
+from itertools import tee, product, chain
 
 
 __all__ = ['Form']
@@ -22,7 +22,28 @@ class Form(object):
         priority=3: good and bad values for all fields
         """
         fields = self.fields.items()
-        return iter_cases(fields, priority)
+        #return iter_cases(fields, priority)
+        if priority == 1:
+            # def p1():
+            #     for name in self.fields.keys():
+            #         for case in product(*([(key, case)
+            #                                for case in field.iter_cases(1 if key == name else 0)]
+            #                               for key, field in fields)):
+            #             yield case
+            # cases = p1()
+            cases = chain(*(product(*([(key, case)
+                                       for case in field.iter_cases(1 if key == name else 0)]
+                                      for key, field in fields))
+                            for name in self.fields.keys()))
+        elif priority == 2:
+            cases = chain(*(product(*([(key, case)
+                                       for case in field.iter_cases(2 if key == name else 0)]
+                                      for key, field in fields))
+                            for name in self.fields.keys()))
+        else:
+            cases = product(*([(key, case) for case in field.iter_cases(priority)]
+                              for key, field in fields))
+        return (dict(case) for case in cases)
 
     def list_cases(self, priority=1):
         return list(self.iter_cases(priority))

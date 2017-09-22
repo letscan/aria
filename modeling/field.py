@@ -2,6 +2,8 @@
 """Fields
 """
 import random
+from itertools import chain
+
 
 ALPHANUM = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
 
@@ -21,6 +23,14 @@ class EnumField(BaseField):
     def __init__(self, values, bad_values):
         self.values = values
         self.bad_values = bad_values
+
+    def iter_cases(self, priority=1):
+        if priority == 0:
+            return self.values[:1]
+        elif priority == 1:
+            return iter(self.values)
+        else:
+            return chain(iter(self.values), iter(self.bad_values))
 
 
 class IntegerField(BaseField):
