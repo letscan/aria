@@ -1,6 +1,8 @@
 # coding: utf-8
 """Walk around the work flow
 """
+import os
+import subprocess
 
 
 class FlowFinished(Exception):
@@ -79,3 +81,33 @@ class Flow(object):
         return self.graph
 
     log = print
+
+    def draw(self, graphviz, img_path):
+        edges = []  # use list to keep order
+        for start, end, label in self.graph:
+            edge = '"{}" -> "{}" [ label = "{}" ];\n'.format(
+                    Z(start), Z(end) or '流程结束', Z(label))
+            if edge not in edges:
+                edges.append(edge)
+        img_dir = os.path.dirname(os.path.realpath(img_path))
+        try:
+            os.makedirs(img_dir)
+        except (IOError, OSError):
+            """dir already exists"""
+        gv_path = os.path.splitext(img_path)[0] + '.gv'
+        font = 'Microsoft Yahei'
+        with open(gv_path, 'w', encoding='utf-8') as gv:
+            gv.write('digraph {\n')
+            gv.write('node [shape=box fontname="{}"];\n'.format(font))
+            gv.write('edge [fontname="{}" fontsize="12" fontcolor="blue"];\n'.format(font))
+            gv.writelines(edges)
+            gv.write('}')
+        with open(img_path, 'wb') as img:
+            subprocess.call([graphviz, '-Tpng', gv_path], stdout=img)
+
+
+def Z(text):
+    if not text:
+        return text
+    text = str(text)
+    return '\n'.join(text.split()).replace('\\', '\\\\')
