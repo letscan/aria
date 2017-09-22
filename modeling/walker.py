@@ -5,19 +5,10 @@ import os
 import subprocess
 
 
+__all__ = ['Flow', 'Step', 'FlowFinished']
+
+
 class FlowFinished(Exception):
-    pass
-
-
-class StepError(Exception):
-    pass
-
-
-class LoginError(StepError):
-    pass
-
-
-class SubmitError(StepError):
     pass
 
 
@@ -62,8 +53,6 @@ class Flow(object):
             self.log(step, label)
             try:
                 new_step = step.run(case)
-            except StepError as e:
-                print(e)
             except FlowFinished:
                 self.log('流程结束')
                 self.graph.append((step, None, label))
