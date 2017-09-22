@@ -16,10 +16,10 @@ class Form(object):
     def iter_cases(self, priority=1):
         """Return an iterator
 
-        priority=0: only primary value of each field
-        priority=1: good values for one field, primary value for others
-        priority=2: good and bad values for one field, primary value for others
-        priority=3: good and bad values for all fields
+        priority=0: only p0 values of each field
+        priority=1: p0 + p1 values for one field, p0 values for others
+        priority=2: p0 + p1 + p2 values for one field, p0 values for others
+        priority=3: p0 + p1 + p2 values for all fields
         """
         priority = max(0, priority)
         fields = self.fields.items()
