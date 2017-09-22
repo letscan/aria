@@ -2,7 +2,6 @@
 """Fields
 """
 import random
-from itertools import chain
 
 
 ALPHANUM = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
@@ -13,24 +12,20 @@ __all__ = ['EnumField', 'IntegerField', 'TextField']
 class BaseField(object):
     """Base
     """
-    def iter_cases(self, priority=1):
-        if priority == 0:
-            return iter(self.p0_values())
-        elif priority == 1:
-            return chain(iter(self.p0_values()),
-                         iter(self.p1_values()))
-        else:
-            return chain(iter(self.p0_values()),
-                         iter(self.p1_values()),
-                         iter(self.p2_values()))
+    def iter_cases(self, include):
+        include = include or ['p0', 'p1']
+        for key in include:
+            provider = getattr(self, key + '_cases', iter(''))
+            for case in provider():
+                yield case
 
-    def p0_values(self):
+    def p0_cases(self):
         raise NotImplementedError()
 
-    def p1_values(self):
+    def p1_cases(self):
         raise NotImplementedError()
 
-    def p2_values(self):
+    def p2_cases(self):
         raise NotImplementedError()
 
 
@@ -41,13 +36,13 @@ class EnumField(BaseField):
         self.values = values
         self.bad_values = bad_values
 
-    def p0_values(self):
+    def p0_cases(self):
         return self.values[:1]
 
-    def p1_values(self):
+    def p1_cases(self):
         return self.values[1:]
 
-    def p2_values(self):
+    def p2_cases(self):
         return self.bad_values
 
 
@@ -58,13 +53,13 @@ class IntegerField(BaseField):
         self.min_value = min_value
         self.max_value = max_value
 
-    def p0_values(self):
+    def p0_cases(self):
         return [random.randint(self.min_value + 1, self.max_value - 1)]
 
-    def p1_values(self):
+    def p1_cases(self):
         return [self.min_value, self.max_value, 0]
 
-    def p2_values(self):
+    def p2_cases(self):
         return [self.min_value - 1, self.max_value + 1, -1]
 
 
@@ -76,17 +71,17 @@ class TextField(BaseField):
         self.max_length = max_length or min_length
         self.chars = chars or ALPHANUM
 
-    def p0_values(self):
+    def p0_cases(self):
         return [random_text(self.min_length, self.max_length, self.chars)]
 
-    def p1_values(self):
+    def p1_cases(self):
         return [
             random_text(self.min_length, chars=self.chars),
             random_text(self.max_length, chars=self.chars),
             '',
         ]
 
-    def p2_values(self):
+    def p2_cases(self):
         return [
             random_text(self.min_length - 1, chars=self.chars),
             random_text(self.max_length + 1, chars=self.chars),
