@@ -53,7 +53,7 @@ class Form(object):
                 )))
         if priority >= 3:
             case_gens.extend(product(*(
-                [(key, case) for case in field.iter_cases(['p3'])]
+                [(key, case) for case in field.iter_cases(['p2'])]
                 for key, field in fields))
             )
         return (dict(case) for case in chain(case_gens))
