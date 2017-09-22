@@ -27,6 +27,9 @@ class Step(object):
     def run(self, params):
         raise NotImplementedError
 
+    def __str__(self):
+        return self.name
+
     def __repr__(self):
         return '<{}>'.format(self.name)
 
@@ -40,9 +43,11 @@ class Flow(object):
         self.step = first_step
 
     def trace(self, route):
-        for step, case in route:
+        step = self.step
+        for case in route:
             self.log(step, step.user, case)
-            step.run(case)
+            step = step.run(case)
+        return step
 
     def walk(self, step=None, route=None, priority=1):
         step = step or self.step
@@ -50,7 +55,7 @@ class Flow(object):
         tt = False
         for case in step.form.iter_cases(priority):
             if tt:
-                self.trace(route)
+                step = self.trace(route)
             self.log(step, step.user, case)
             try:
                 new_step = step.run(case)
@@ -58,11 +63,11 @@ class Flow(object):
                 print(e)
             except FlowFinished:
                 self.log('流程结束')
-                self.graph.append((Step, None))
+                self.graph.append((step, None))
                 print('=' * 40)
                 tt = True
             else:
-                route.append((step, case))
+                route.append(case)
                 self.graph.append((step, new_step))
                 self.walk(new_step, route, priority)
                 tt = True
