@@ -13,8 +13,25 @@ __all__ = ['EnumField', 'IntegerField', 'TextField']
 class BaseField(object):
     """Base
     """
-    def iter(self, priority=1):
-        pass
+    def iter_cases(self, priority=1):
+        if priority == 0:
+            return iter(self.p0_values())
+        elif priority == 1:
+            return chain(iter(self.p0_values()),
+                         iter(self.p1_values()))
+        else:
+            return chain(iter(self.p0_values()),
+                         iter(self.p1_values()),
+                         iter(self.p2_values()))
+
+    def p0_values(self):
+        raise NotImplementedError()
+
+    def p1_values(self):
+        raise NotImplementedError()
+
+    def p2_values(self):
+        raise NotImplementedError()
 
 
 class EnumField(BaseField):
@@ -24,13 +41,14 @@ class EnumField(BaseField):
         self.values = values
         self.bad_values = bad_values
 
-    def iter_cases(self, priority=1):
-        if priority == 0:
-            return self.values[:1]
-        elif priority == 1:
-            return iter(self.values)
-        else:
-            return chain(iter(self.values), iter(self.bad_values))
+    def p0_values(self):
+        return self.values[:1]
+
+    def p1_values(self):
+        return self.values[1:]
+
+    def p2_values(self):
+        return self.bad_values
 
 
 class IntegerField(BaseField):
@@ -39,6 +57,15 @@ class IntegerField(BaseField):
     def __init__(self, min_value, max_value):
         self.min_value = min_value
         self.max_value = max_value
+
+    def p0_values(self):
+        return [random.randint(self.min_value + 1, self.max_value - 1)]
+
+    def p1_values(self):
+        return [self.min_value, self.max_value, 0]
+
+    def p2_values(self):
+        return [self.min_value - 1, self.max_value + 1, -1]
 
 
 class TextField(BaseField):
@@ -49,7 +76,28 @@ class TextField(BaseField):
         self.max_length = max_length or min_length
         self.chars = chars or ALPHANUM
 
-    def random_text(self):
-        length = random.randint(self.min_length, self.max_length)
-        text = ''.join(random.choice(self.chars) for _ in range(length))
-        return text
+    def p0_values(self):
+        return [random_text(self.min_length, self.max_length, self.chars)]
+
+    def p1_values(self):
+        return [
+            random_text(self.min_length, chars=self.chars),
+            random_text(self.max_length, chars=self.chars),
+            '',
+        ]
+
+    def p2_values(self):
+        return [
+            random_text(self.min_length - 1, chars=self.chars),
+            random_text(self.max_length + 1, chars=self.chars),
+            random_text(self.min_length, self.max_length, chars='"&?%#@*'),
+        ]
+
+
+def random_text(min_length, max_length=None, chars=None):
+    min_length = max(min_length, 1)
+    max_length = max_length or min_length
+    chars = chars or ALPHANUM
+    length = random.randint(min_length, max_length)
+    text = ''.join(random.choice(chars) for _ in range(length))
+    return text

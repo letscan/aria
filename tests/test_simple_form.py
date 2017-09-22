@@ -3,7 +3,7 @@
 """
 import unittest
 
-from modeling import Form, EnumField
+from modeling import Form, EnumField, IntegerField, TextField
 
 
 class SimpleFormTest(unittest.TestCase):
@@ -11,11 +11,11 @@ class SimpleFormTest(unittest.TestCase):
     """
     def test_enum_form(self):
         form = Form({
-            'ef1': EnumField([1, 2], [5, 6]),
-            'ef2': EnumField([3, 4], [7, 8]),
-            'ef3': EnumField([9, 16], [9, 10]),
+            'ef': EnumField([1, 2], [5, 6]),
+            'nf': IntegerField(4, 9),
+            'tf': TextField(3, 8, 'abcdef'),
         })
-        for case in form.iter_cases(priority=2):
+        for case in form.iter_cases(priority=1):
             print(case)
 
 
