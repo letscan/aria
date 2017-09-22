@@ -56,11 +56,16 @@ class Form(object):
                 [(key, case) for case in field.iter_cases(['p1', 'p2'])]
                 for key, field in fields))
             )
-        return (dict(case) for case in chain(case_gens))
+        return (reform(case) for case in chain(case_gens))
 
     def list_cases(self, priority=1):
         return list(self.iter_cases(priority))
 
+
+def reform(case):
+    kvs = {k: v for k, (n, v) in case}
+    name = '_'.join('{}_{}'.format(k, n) for k, (n, v) in case)
+    return name, kvs
 
 class NoMoreField(Exception):
     """No more field in ``other``

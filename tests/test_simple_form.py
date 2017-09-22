@@ -11,7 +11,7 @@ class SimpleFormTest(unittest.TestCase):
     """
     def test_enum_form(self):
         form = Form({
-            'ef': EnumField([1, 2], [5, 6]),
+            'ef': EnumField([('v1', 1), ('v2', 2)], [('v5', 5), ('v6', 6)]),
             'nf': IntegerField(4, 9),
             'tf': TextField(3, 8, 'abcdef'),
         })

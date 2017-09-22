@@ -32,9 +32,13 @@ class BaseField(object):
 class EnumField(BaseField):
     """Enum
     """
-    def __init__(self, values, bad_values):
+    def __init__(self, values, bad_values=None):
+        if hasattr(values, 'items'):
+            values = list(values.items())
         self.values = values
-        self.bad_values = bad_values
+        if hasattr(bad_values, 'items'):
+            bad_values = list(bad_values.items())
+        self.bad_values = bad_values or []
 
     def p0_cases(self):
         return self.values[:1]
@@ -54,13 +58,23 @@ class IntegerField(BaseField):
         self.max_value = max_value
 
     def p0_cases(self):
-        return [random.randint(self.min_value + 1, self.max_value - 1)]
+        return [
+            ('normal', random.randint(self.min_value + 1, self.max_value - 1)),
+        ]
 
     def p1_cases(self):
-        return [self.min_value, self.max_value, 0]
+        return [
+            ('zero', 0),
+            ('min', self.min_value),
+            ('max', self.max_value),
+        ]
 
     def p2_cases(self):
-        return [self.min_value - 1, self.max_value + 1, -1]
+        return [
+            ('min-', self.min_value - 1),
+            ('max+', self.max_value + 1),
+            ('negative', -1)
+        ]
 
 
 class TextField(BaseField):
@@ -72,20 +86,22 @@ class TextField(BaseField):
         self.chars = chars or ALPHANUM
 
     def p0_cases(self):
-        return [random_text(self.min_length, self.max_length, self.chars)]
+        return [
+            ('plain', random_text(self.min_length, self.max_length, self.chars)),
+        ]
 
     def p1_cases(self):
         return [
-            random_text(self.min_length, chars=self.chars),
-            random_text(self.max_length, chars=self.chars),
-            '',
+            ('empty', ''),
+            ('min', random_text(self.min_length, chars=self.chars)),
+            ('max', random_text(self.max_length, chars=self.chars)),
         ]
 
     def p2_cases(self):
         return [
-            random_text(self.min_length - 1, chars=self.chars),
-            random_text(self.max_length + 1, chars=self.chars),
-            random_text(self.min_length, self.max_length, chars='"&?%#@*'),
+            ('min-', random_text(self.min_length - 1, chars=self.chars)),
+            ('max+', random_text(self.max_length + 1, chars=self.chars)),
+            ('danger', random_text(self.min_length, self.max_length, chars='"&?%#@*')),
         ]
 
 
