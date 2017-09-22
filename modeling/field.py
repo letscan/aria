@@ -15,7 +15,7 @@ class BaseField(object):
     def iter_cases(self, include):
         include = include or ['p0', 'p1']
         for key in include:
-            provider = getattr(self, key + '_cases', iter(''))
+            provider = getattr(self, key + '_cases', lambda: iter(''))
             for case in provider():
                 yield case
 
