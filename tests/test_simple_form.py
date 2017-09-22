@@ -14,8 +14,8 @@ class SimpleFormTest(unittest.TestCase):
             'ef1': EnumField([1, 2], [5, 6]),
             'ef2': EnumField([3, 4], [7, 8]),
         })
-        for item in form.iter():
-            print(item)
+        for case in form.iter_cases():
+            print(case)
 
 
 if __name__ == '__main__':
