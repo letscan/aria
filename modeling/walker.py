@@ -1,10 +1,11 @@
 # coding: utf-8
-"""Walk around the work Step
+"""Walk around the work flow
 """
 
 
 class FlowFinished(Exception):
     pass
+
 
 class StepError(Exception):
     pass
@@ -45,7 +46,7 @@ class Flow(object):
     def trace(self, route):
         step = self.step
         for label, case in route:
-            self.log(step, step.user, label)
+            self.log(step, label)
             step = step.run(case)
         return step
 
@@ -56,19 +57,19 @@ class Flow(object):
         for label, case in step.form.iter_cases(priority):
             if tt:
                 step = self.trace(route)
-            self.log(step, step.user, label)
+            self.log(step, label)
             try:
                 new_step = step.run(case)
             except StepError as e:
                 print(e)
             except FlowFinished:
                 self.log('流程结束')
-                self.graph.append((step, None))
+                self.graph.append((step, None, label))
                 print('=' * 40)
                 tt = True
             else:
                 route.append((label, case))
-                self.graph.append((step, new_step))
+                self.graph.append((step, new_step, label))
                 self.walk(new_step, route, priority)
                 tt = True
         try:
