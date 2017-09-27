@@ -64,7 +64,7 @@ class Form(object):
 
 def reform(case):
     kvs = {k: v for k, (n, v) in case}
-    name = '_'.join('{}_{}'.format(k, n) for k, (n, v) in case)
+    name = ' '.join(n for k, (n, v) in case)
     return name, kvs
 
 class NoMoreField(Exception):
