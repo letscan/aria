@@ -87,12 +87,15 @@ class Flow(object):
         font = 'Microsoft Yahei'
         with open(gv_path, 'w', encoding='utf-8') as gv:
             gv.write('digraph {\n')
-            gv.write('node [shape=box fontname="{}"];\n'.format(font))
-            gv.write('edge [fontname="{}" fontsize="12" fontcolor="blue"];\n'.format(font))
+            gv.write('node [shape="box"];\n')
+            gv.write('edge [fontsize="12" fontcolor="blue"];\n')
             gv.writelines(edges)
             gv.write('}')
-        with open(img_path, 'wb') as img:
-            subprocess.call([graphviz, '-Tpng', gv_path], stdout=img)
+        subprocess.call([graphviz, '-Tpng',
+            '-Efontname={}'.format(font),
+            '-Nfontname={}'.format(font),
+            '-o' + img_path, gv_path
+        ])
 
 
 def Z(text):
