@@ -91,7 +91,8 @@ class Flow(object):
             gv.write('edge [fontsize="12" fontcolor="blue"];\n')
             gv.writelines(edges)
             gv.write('}')
-        subprocess.call([graphviz, '-Tpng',
+        _, img_type = os.path.splitext(img_path)
+        subprocess.call([graphviz, '-T{}'.format(img_type[1:]),
             '-Efontname={}'.format(font),
             '-Nfontname={}'.format(font),
             '-o' + img_path, gv_path
