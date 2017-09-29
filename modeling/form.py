@@ -25,37 +25,38 @@ class Form(object):
         fields = self.fields.items()
         #return iter_cases(fields, priority)
         case_gens = []
-        if priority >= 0:
-            case_gens.extend(product(*(
-                [(key, case) for case in field.iter_cases(['p0'])]
-                for key, field in fields))
-            )
-        if priority >= 1:
-            # def p1():
-            #     for name in self.fields.keys():
-            #         for case in product(*([(key, case)
-            #                                for case in field.iter_cases(1 if key == name else 0)]
-            #                               for key, field in fields)):
-            #             yield case
-            # cases = p1()
-            for name in self.fields.keys():
-                case_gens.extend(product(*(
-                    [(key, case) for case in field.iter_cases(
-                                            ['p1' if key == name else 'p0'])]
-                    for key, field in fields))
-                )
-        if priority >= 2:
-            for name in self.fields.keys():
-                case_gens.extend(product(*(
-                    [(key, case) for case in field.iter_cases(
-                                            ['p2' if key == name else 'p0'])]
-                    for key, field in fields
-                )))
         if priority >= 3:
             case_gens.extend(product(*(
-                [(key, case) for case in field.iter_cases(['p1', 'p2'])]
+                [(key, case) for case in field.iter_cases(['p0', 'p1', 'p2'])]
                 for key, field in fields))
             )
+        else:
+            if priority >= 0:
+                case_gens.extend(product(*(
+                    [(key, case) for case in field.iter_cases(['p0'])]
+                    for key, field in fields))
+                )
+            if priority >= 1:
+                # def p1():
+                #     for name in self.fields.keys():
+                #         for case in product(*([(key, case)
+                #                                for case in field.iter_cases(1 if key == name else 0)]
+                #                               for key, field in fields)):
+                #             yield case
+                # cases = p1()
+                for name in self.fields.keys():
+                    case_gens.extend(product(*(
+                        [(key, case) for case in field.iter_cases(
+                                                ['p1' if key == name else 'p0'])]
+                        for key, field in fields))
+                    )
+            if priority >= 2:
+                for name in self.fields.keys():
+                    case_gens.extend(product(*(
+                        [(key, case) for case in field.iter_cases(
+                                                ['p2' if key == name else 'p0'])]
+                        for key, field in fields
+                    )))
         return (reform(case) for case in chain(case_gens))
 
     def list_cases(self, priority=1):
