@@ -35,6 +35,7 @@ class Flow(object):
 
     def __init__(self, first_step):
         self.step = first_step
+        self.routes = []
 
     def trace(self, route):
         step = self.step
@@ -42,6 +43,10 @@ class Flow(object):
             self.log(step, label)
             step = step.run(case)
         return step
+
+    def route_end(self, route):
+        self.routes.append(route)
+        print(str(len(self.routes)).center(40, '='))
 
     def walk(self, step=None, route=None, priority=1):
         step = step or self.step
@@ -56,7 +61,7 @@ class Flow(object):
             except FlowFinished:
                 self.log('流程结束')
                 self.graph.append((step, None, label))
-                print('=' * 40)
+                self.route_end(route)
                 tt = True
             else:
                 route.append((label, case))
