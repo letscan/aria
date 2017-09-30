@@ -71,8 +71,8 @@ class IntegerField(BaseField):
 
     def p2_cases(self):
         return [
-            ('min-', self.min_value - 1),
-            ('max+', self.max_value + 1),
+            ('<min', self.min_value - 1),
+            ('>max', self.max_value + 1),
             ('negative', -1)
         ]
 
@@ -99,8 +99,8 @@ class TextField(BaseField):
 
     def p2_cases(self):
         return [
-            ('min-', random_text(self.min_length - 1, chars=self.chars)),
-            ('max+', random_text(self.max_length + 1, chars=self.chars)),
+            ('<min', random_text(self.min_length - 1, chars=self.chars)),
+            ('>max', random_text(self.max_length + 1, chars=self.chars)),
             ('danger', random_text(self.min_length, self.max_length, chars='"&?%#@*')),
         ]
 
