@@ -2,6 +2,7 @@
 """Fields
 """
 import random
+import warnings
 
 
 ALPHANUM = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
@@ -33,12 +34,16 @@ class EnumField(BaseField):
     """Enum
     """
     def __init__(self, values, bad_values=None):
+        if not values:
+            raise ValueError('EnumField can not be empty!')
         if hasattr(values, 'items'):
             values = list(values.items())
         self.values = values
         if hasattr(bad_values, 'items'):
             bad_values = list(bad_values.items())
         self.bad_values = bad_values or []
+        if len(self.values) + len(self.bad_values) == 1:
+            warnings.warn("A single-value EnumField is not very useful.")
 
     def p0_cases(self):
         return self.values[:1]
