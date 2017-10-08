@@ -5,9 +5,9 @@ import random
 import warnings
 
 
-ALPHANUM = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
-
 __all__ = ['EnumField', 'IntegerField', 'TextField']
+
+ALPHANUM = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
 
 
 class BaseField(object):
