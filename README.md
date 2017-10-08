@@ -1,12 +1,12 @@
 Modeling
 ============
 
-**MBT utils**
+**A MBT modeling utils**
 
 Install
 -------
 ```
-pip install git+https://github.com/letscan/modeling.git -U
+pip install git+https://github.com/letscan/aria.git -U
 ```
 
 Usage

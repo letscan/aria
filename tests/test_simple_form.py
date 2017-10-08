@@ -3,7 +3,7 @@
 """
 import unittest
 
-from modeling import Form, EnumField, IntegerField, TextField
+from aria import Form, EnumField, IntegerField, TextField
 
 
 class SimpleFormTest(unittest.TestCase):
