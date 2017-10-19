@@ -5,11 +5,17 @@ import os
 import subprocess
 
 
-__all__ = ['Flow', 'Step', 'FlowFinished']
+__all__ = ['Flow', 'Step', 'FlowFinished', 'FlowError']
 
 
 class FlowFinished(Exception):
-    pass
+    """Indicate the flow finished without any error
+    """
+
+
+class FlowError(Exception):
+    """Indicate the flow is on unexpected situation
+    """
 
 
 class Step(object):
@@ -58,9 +64,14 @@ class Flow(object):
             self.log(step, label)
             try:
                 new_step = step.run(case)
-            except FlowFinished:
-                self.log('流程结束')
-                self.graph.append((step, None, label))
+            except FlowFinished as e:
+                self.log(e)
+                self.graph.append((step, e, label))
+                self.route_end(route)
+                tt = True
+            except FlowError as e:
+                self.log(e)
+                self.graph.append((step, e, label))
                 self.route_end(route)
                 tt = True
             else:
@@ -80,7 +91,7 @@ class Flow(object):
         edges = []  # use list to keep order
         for start, end, label in self.graph:
             edge = '"{}" -> "{}" [ label = "{}" ];\n'.format(
-                    Z(start), Z(end) or '流程结束', Z(label))
+                    Z(start), Z(end), Z(label))
             if edge not in edges:
                 edges.append(edge)
         img_dir = os.path.dirname(os.path.realpath(img_path))
