@@ -21,8 +21,15 @@ class FlowError(Exception):
 class Step(object):
     """Step Base Class
     """
-    def __init__(self, name):
-        self.name = name
+    name = 'Step'
+
+    def __init__(self, **kwargs):
+        for name, value in kwargs.items():
+            if name.startswith('_'):
+                continue
+            if callable(getattr(self, name, None)):
+                continue
+            setattr(self, name, value)
 
     def run(self, params):
         raise NotImplementedError
@@ -31,7 +38,7 @@ class Step(object):
         return self.name
 
     def __repr__(self):
-        return '<{}>'.format(self.name)
+        return '<{} "{}">'.format(self.__class__.__name__, self)
 
 
 class Flow(object):
