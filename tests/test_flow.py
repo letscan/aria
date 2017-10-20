@@ -61,6 +61,7 @@ class OnlinePayment(Step):
     form = Form({
         'confirmed': EnumField({'确认支付': True, '取消支付': False}),
     })
+    order_id = None
 
     def run(self, params):
         Service.update_order(self.order_id, params)
@@ -79,6 +80,7 @@ class PackageGift(Step):
     form = Form({
         'packaged': EnumField({'包装成功': True, '包装失败': False}),
     })
+    order_id = None
 
     def run(self, params):
         Service.update_order(self.order_id, params)
@@ -98,6 +100,7 @@ class DeliverGoods(Step):
     form = Form({
         'delivered': EnumField({'妥投': True, '拒收': False}),
     })
+    order_id = None
 
     def run(self, params):
         Service.update_order(self.order_id, params)
