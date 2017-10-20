@@ -59,7 +59,7 @@ class Flow(object):
 
     def route_end(self, route):
         self.routes.append(route)
-        print(str(len(self.routes)).center(40, '='))
+        print(' {} '.format(len(self.routes)).center(40, '='))
 
     def walk(self, step=None, route=None, priority=1):
         step = step or self.step
