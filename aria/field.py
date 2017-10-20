@@ -43,7 +43,8 @@ class EnumField(BaseField):
             bad_values = list(bad_values.items())
         self.bad_values = bad_values or []
         if len(self.values) + len(self.bad_values) == 1:
-            warnings.warn("A single-value EnumField is not very useful.")
+            warnings.warn("A single-value EnumField is not very useful: "
+                          "{!r}".format(self.values + self.bad_values))
 
     def p0_cases(self):
         return self.values[:1]
