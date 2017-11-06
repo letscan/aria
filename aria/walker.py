@@ -64,9 +64,9 @@ class Flow(object):
     def walk(self, step=None, route=None, priority=1):
         step = step or self.step
         route = route or []
-        tt = False
+        need_trace = False
         for label, case in step.form.iter_cases(priority):
-            if tt:
+            if need_trace:
                 step = self.trace(route)
             self.log(step, label)
             try:
@@ -75,17 +75,17 @@ class Flow(object):
                 self.log(e)
                 self.graph.append((step, e, label))
                 self.route_end(route)
-                tt = True
+                need_trace = True
             except FlowError as e:
                 self.log(e)
                 self.graph.append((step, e, label))
                 self.route_end(route)
-                tt = True
+                need_trace = True
             else:
                 route.append((label, case))
                 self.graph.append((step, new_step, label))
                 self.walk(new_step, route, priority)
-                tt = True
+                need_trace = True
         try:
             route.pop()
         except IndexError:
