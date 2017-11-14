@@ -66,6 +66,9 @@ class Flow(object):
         route = route or []
         need_trace = False
         for case in step.form.iter_cases(priority):
+            route_priority = sum(case.priority for case in route)
+            if case.priority + route_priority > max(len(route) - 2, 2):
+                continue
             label = case.label
             if need_trace:
                 step = self.trace(route)
