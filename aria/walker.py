@@ -52,9 +52,9 @@ class Flow(object):
 
     def trace(self, route):
         step = self.step
-        for label, case in route:
-            self.log(step, label)
-            step = step.run(case)
+        for case in route:
+            self.log(step, case.label)
+            step = step.run(case.values)
         return step
 
     def route_end(self, route):
@@ -65,12 +65,13 @@ class Flow(object):
         step = step or self.step
         route = route or []
         need_trace = False
-        for label, case in step.form.iter_cases(priority):
+        for case in step.form.iter_cases(priority):
+            label = case.label
             if need_trace:
                 step = self.trace(route)
             self.log(step, label)
             try:
-                new_step = step.run(case)
+                new_step = step.run(case.values)
             except FlowFinished as e:
                 self.log(e)
                 self.graph.append((step, e, label))
@@ -82,7 +83,7 @@ class Flow(object):
                 self.route_end(route)
                 need_trace = True
             else:
-                route.append((label, case))
+                route.append(case)
                 self.graph.append((step, new_step, label))
                 self.walk(new_step, route, priority)
                 need_trace = True

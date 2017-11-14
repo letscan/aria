@@ -7,6 +7,34 @@ from itertools import tee, product, chain
 __all__ = ['Form']
 
 
+class Case(object):
+    """Form Case
+    """
+    def __init__(self, case):
+        self.priority = self._calc_priority([c.priority for _, c in case])
+        self.label = ' '.join(c.label for _, c in case)
+        self.values = {k: c.value for k, c in case}
+
+    def _calc_priority(self, priorities):
+        n_p0 = priorities.count('p0')
+        n_p1 = priorities.count('p1')
+        n_p2 = priorities.count('p2')
+        if n_p0 == len(priorities):
+            return 0
+        elif n_p1 == 1 and n_p2 == 0:
+            return 1
+        elif n_p1 == 0 and n_p2 == 1:
+            return 2
+        else:
+            return 3
+
+    def __getitem__(self, key):
+        return self.values[key]
+
+    def __str__(self):
+        return '(p{})"{}" {}'.format(self.priority, self.label, self.values)
+
+
 class Form(object):
     """Form
     """
@@ -57,16 +85,11 @@ class Form(object):
                                                 ['p2' if key == name else 'p0'])]
                         for key, field in fields
                     )))
-        return (reform(case) for case in chain(case_gens))
+        return (Case(case) for case in chain(case_gens))
 
     def list_cases(self, priority=1):
         return list(self.iter_cases(priority))
 
-
-def reform(case):
-    kvs = {k: v for k, (n, v) in case}
-    name = ' '.join(n for k, (n, v) in case)
-    return name, kvs
 
 class NoMoreField(Exception):
     """No more field in ``other``

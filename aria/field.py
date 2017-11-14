@@ -3,11 +3,14 @@
 """
 import random
 import warnings
-
+from collections import namedtuple
 
 __all__ = ['EnumField', 'IntegerField', 'TextField']
 
 ALPHANUM = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
+
+
+Case = namedtuple('Case', ('priority', 'label', 'value'))
 
 
 class BaseField(object):
@@ -15,10 +18,10 @@ class BaseField(object):
     """
     def iter_cases(self, include):
         include = include or ['p0', 'p1']
-        for key in include:
-            provider = getattr(self, key + '_cases', lambda: iter(''))
-            for case in provider():
-                yield case
+        for priority in include:
+            provider = getattr(self, priority + '_cases', lambda: iter(''))
+            for label, value in provider():
+                yield Case(priority, label, value)
 
     def p0_cases(self):
         raise NotImplementedError()
