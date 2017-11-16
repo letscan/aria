@@ -1,9 +1,12 @@
 # coding: utf-8
 """Walk around the work flow
 """
+import logging
 import os
 import subprocess
 
+
+logger = logging.getLogger(__name__)
 
 __all__ = ['Flow', 'Step', 'FlowFinished', 'FlowError']
 
@@ -59,7 +62,7 @@ class Flow(object):
 
     def route_end(self, route):
         self.routes.append(route)
-        print(' {} '.format(len(self.routes)).center(40, '='))
+        self.log(' {} '.format(len(self.routes)).center(40, '='))
 
     def walk(self, step=None, route=None, priority=1):
         step = step or self.step
@@ -85,6 +88,11 @@ class Flow(object):
                 self.graph.append((step, e, label))
                 self.route_end(route)
                 need_trace = True
+            except Exception as e:
+                logger.exception('Something wrong with %s(%s)', step, label)
+                self.graph.append((step, e, label))
+                self.route_end(route)
+                need_trace = True
             else:
                 route.append(case)
                 self.graph.append((step, new_step, label))
@@ -96,7 +104,9 @@ class Flow(object):
             """All finished"""
         return self.graph
 
-    log = print
+    def log(self, step, label=None, *args, **kwargs):
+        msg = str(step) + '({})'.format(label) if label else ''
+        logger.info(msg, *args, **kwargs)
 
     def draw(self, graphviz, img_path):
         edges = []  # use list to keep order
