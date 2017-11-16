@@ -73,6 +73,7 @@ class OnlinePayment(Step):
         else:
             raise FlowError('订单取消')
 
+
 class PackageGift(Step):
     """礼品包装
     """
@@ -87,8 +88,8 @@ class PackageGift(Step):
         order = Service.get_order(self.order_id)
         if order['packaged']:
             return DeliverGoods(order_id=self.order_id)
-        #elif order['confirmed']:
-        #    return PackageGift(order_id=self.order_id)
+        elif order['confirmed']:
+            return PackageGift(order_id=self.order_id)
         else:
             raise FlowError('未知错误')
 
