@@ -6,9 +6,17 @@ import os
 import subprocess
 
 
-logger = logging.getLogger(__name__)
-
 __all__ = ['Flow', 'Step', 'FlowFinished', 'FlowError']
+
+
+def setup_logger():
+    logger = logging.getLogger(__name__)
+    handler = logging.StreamHandler()
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    return logger
+logger = setup_logger()
 
 
 class FlowFinished(Exception):
@@ -105,7 +113,9 @@ class Flow(object):
         return self.graph
 
     def log(self, step, label=None, *args, **kwargs):
-        msg = str(step) + '({})'.format(label) if label else ''
+        msg = str(step)
+        if label:
+            msg += ' ({})'.format(label)
         logger.info(msg, *args, **kwargs)
 
     def draw(self, graphviz, img_path):
