@@ -34,6 +34,10 @@ class Case(object):
     def __str__(self):
         return '(p{})"{}" {}'.format(self.priority, self.label, self.values)
 
+    def __repr__(self):
+        return '<{} "(p{}){}">'.format(self.__class__.__name__,
+                                       self.priority, self.label)
+
 
 class Form(object):
     """Form
