@@ -37,14 +37,15 @@ class SubmitOrder(Step):
     """
     name = '提交订单'
     form = Form({
-        'package': EnumField({'礼品包装': 'gift', '普通包装': 'standard'}),
+        'package': EnumField({'礼品包装': 'gift', '普通包装': 'standard',
+                              '防碎包装': 'proof', '自带包装': 'packaged'}),
         'payment': EnumField({'在线支付': 'online', '货到付款': 'cod'}),
     })
 
     def run(self, params):
         order_id = Service.create_order(params)
         order = Service.get_order(order_id)
-        if order['packaged']:
+        if order['packaged'] and order['confirmed']:
             return DeliverGoods(order_id=order_id)
         elif order['confirmed']:
             return PackageGift(order_id=order_id)
@@ -66,7 +67,7 @@ class OnlinePayment(Step):
     def run(self, params):
         Service.update_order(self.order_id, params)
         order = Service.get_order(self.order_id)
-        if order['packaged']:
+        if order['packaged'] and order['confirmed']:
             return DeliverGoods(order_id=self.order_id)
         elif order['confirmed']:
             return PackageGift(order_id=self.order_id)
