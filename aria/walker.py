@@ -1,12 +1,16 @@
 # coding: utf-8
-"""Walk around the work flow
+"""Walk through the work flow
 """
 import logging
 import os
 import subprocess
+from collections import defaultdict, namedtuple
 
 
 __all__ = ['Flow', 'Step', 'FlowFinished', 'FlowError']
+
+
+Node = namedtuple('Node', ('case', 'step'))
 
 
 def setup_logger():
@@ -63,7 +67,7 @@ class Flow(object):
 
     def trace(self, route):
         step = self.step
-        for case in route:
+        for case, _ in route:
             self.log(step, case.label)
             step = step.run(case.values)
         return step
@@ -77,7 +81,7 @@ class Flow(object):
         route = route or []
         need_trace = False
         for case in step.form.iter_cases(priority):
-            route_priority = sum(case.priority for case in route)
+            route_priority = sum(node.case.priority for node in route)
             if case.priority + route_priority > priority:
                 continue
             label = case.label
@@ -89,27 +93,24 @@ class Flow(object):
             except FlowFinished as e:
                 self.log(e)
                 self.graph.append((step, e, label))
-                self.route_end(route)
-                need_trace = True
+                self.route_end(route + [Node(case, e)])
             except FlowError as e:
                 self.log(e)
                 self.graph.append((step, e, label))
-                self.route_end(route)
-                need_trace = True
+                self.route_end(route + [Node(case, e)])
             except Exception as e:
-                logger.exception('Something wrong with %s(%s)', step, label)
+                logger.exception('Something goes wrong with %s(%s)', step, label)
                 self.graph.append((step, e, label))
-                self.route_end(route)
-                need_trace = True
+                self.route_end(route + [Node(case, e)])
             else:
-                route.append(case)
+                route.append(Node(case, new_step))
                 self.graph.append((step, new_step, label))
                 self.walk(new_step, route, priority)
-                need_trace = True
+            need_trace = True
         try:
             route.pop()
         except IndexError:
-            """All finished"""
+            self.log(' THE END '.center(40, '='))
         return self.graph
 
     def log(self, step, label=None, *args, **kwargs):
@@ -118,9 +119,32 @@ class Flow(object):
             msg += ' ({})'.format(label)
         logger.info(msg, *args, **kwargs)
 
+    def merge_routes(self):
+        """
+        route = [(case, step), ... , (case, FlowError)]
+        routes = [route, ... , route]
+        graph = [(start_step, end_step, label), ...]
+        """
+        groups = defaultdict(list)
+        for route in self.routes:
+            name = ' '.join(str(node.step) for node in route)
+            groups[name].append(route)
+        graph = []
+        for name, group in groups.items():
+            print(name)
+            start = self.step
+            for nodes in zip(*group):
+                from pprint import pprint
+                pprint(nodes)
+                end = nodes[0].step
+                label = ' ---- '.join(set(node.case.label for node in nodes))
+                graph.append((start, end, label))
+                start = end
+        return graph
+
     def draw(self, graphviz, img_path):
         edges = []  # use list to keep order
-        for start, end, label in self.graph:
+        for start, end, label in self.merge_routes():
             edge = '"{}" -> "{}" [ label = "{}" ];\n'.format(
                     Z(start), Z(end), Z(label))
             if edge not in edges:
