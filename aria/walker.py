@@ -2,9 +2,11 @@
 """Walk through the work flow
 """
 import logging
+import math
 import os
 import subprocess
 from collections import defaultdict, namedtuple
+from io import StringIO
 
 
 __all__ = ['Flow', 'Step', 'FlowFinished', 'FlowError']
@@ -121,27 +123,20 @@ class Flow(object):
         routes = [route, ... , route]
         graph = [(start_step, end_step, label), ...]
         """
-        groups = defaultdict(list)
-        for route in self.routes:
-            name = ' '.join(str(node.step) for node in route)
-            groups[name].append(route)
-        graph = []
-        for name, group in groups.items():
+        groups = defaultdict(set)
+        for idx, route in enumerate(self.routes, start=1):
             start = self.step
-            for nodes in zip(*group):
-                end = nodes[0].step
-                label = ' ---- '.join(set(node.case.label for node in nodes))
-                graph.append((start, end, label))
+            for node in route:
+                end = node.step
+                edge = '"{}" -> "{}"'.format(Z(start), Z(end))
+                groups[edge].add(idx)
                 start = end
+        graph = ['{} [ label = "{}" ]'.format(edge, make_square(idx_list))
+                 for edge, idx_list in groups.items()]
         return graph
 
     def draw(self, graphviz, img_path):
-        edges = []  # use list to keep order
-        for start, end, label in self._merge_routes():
-            edge = '"{}" -> "{}" [ label = "{}" ];\n'.format(
-                    Z(start), Z(end), Z(label))
-            if edge not in edges:
-                edges.append(edge)
+        edges = self._merge_routes()
         img_dir = os.path.dirname(os.path.realpath(img_path))
         try:
             os.makedirs(img_dir)
@@ -162,6 +157,20 @@ class Flow(object):
             '-o' + img_path, gv_path
         ])
 
+
+def make_square(items):
+    stream = StringIO()
+    text = ''.join('({})'.format(item) for item in items)
+    width = max(int(math.sqrt(len(text) * 2 / 0.618)), 12)
+    pos = 0
+    for item in items:
+        chunk = '({})'.format(item)
+        if pos + len(chunk) > width:
+            stream.write('\n')
+            pos = 0
+        offset = stream.write(chunk)
+        pos += offset
+    return stream.getvalue()
 
 def Z(text):
     if not text:
