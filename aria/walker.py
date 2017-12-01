@@ -59,8 +59,6 @@ class Step(object):
 class Flow(object):
     """Flow of steps
     """
-    graph = []
-
     def __init__(self, first_step):
         self.step = first_step
         self.routes = []
@@ -92,26 +90,22 @@ class Flow(object):
                 new_step = step.run(case.values)
             except FlowFinished as e:
                 self.log(e)
-                self.graph.append((step, e, label))
                 self.route_end(route + [Node(case, e)])
             except FlowError as e:
                 self.log(e)
-                self.graph.append((step, e, label))
                 self.route_end(route + [Node(case, e)])
             except Exception as e:
-                logger.exception('Something goes wrong with %s(%s)', step, label)
-                self.graph.append((step, e, label))
-                self.route_end(route + [Node(case, e)])
+                logger.exception('Something goes wrong with %s(%s)',
+                                                          step, label)
+                self.route_end(route + [Node(case, e.__class__.__name__)])
             else:
                 route.append(Node(case, new_step))
-                self.graph.append((step, new_step, label))
                 self.walk(new_step, route, priority)
             need_trace = True
         try:
             route.pop()
         except IndexError:
             self.log(' THE END '.center(40, '='))
-        return self.graph
 
     def log(self, step, label=None, *args, **kwargs):
         msg = str(step)
@@ -119,7 +113,7 @@ class Flow(object):
             msg += ' ({})'.format(label)
         logger.info(msg, *args, **kwargs)
 
-    def merge_routes(self):
+    def _merge_routes(self):
         """
         route = [(case, step), ... , (case, FlowError)]
         routes = [route, ... , route]
@@ -131,11 +125,8 @@ class Flow(object):
             groups[name].append(route)
         graph = []
         for name, group in groups.items():
-            print(name)
             start = self.step
             for nodes in zip(*group):
-                from pprint import pprint
-                pprint(nodes)
                 end = nodes[0].step
                 label = ' ---- '.join(set(node.case.label for node in nodes))
                 graph.append((start, end, label))
@@ -144,7 +135,7 @@ class Flow(object):
 
     def draw(self, graphviz, img_path):
         edges = []  # use list to keep order
-        for start, end, label in self.merge_routes():
+        for start, end, label in self._merge_routes():
             edge = '"{}" -> "{}" [ label = "{}" ];\n'.format(
                     Z(start), Z(end), Z(label))
             if edge not in edges:
