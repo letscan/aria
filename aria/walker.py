@@ -64,6 +64,7 @@ class Flow(object):
         self.routes = []
 
     def trace(self, route):
+        self.log(' {} '.format(len(self.routes) + 1).center(40, '='))
         step = self.step
         for case, _ in route:
             self.log(step, case.label)
@@ -72,7 +73,6 @@ class Flow(object):
 
     def route_end(self, route):
         self.routes.append(route)
-        self.log(' {} '.format(len(self.routes)).center(40, '='))
 
     def walk(self, step=None, route=None, priority=1):
         step = step or self.step
@@ -82,6 +82,8 @@ class Flow(object):
             route_priority = sum(node.case.priority for node in route)
             if case.priority + route_priority > priority:
                 continue
+            if not self.routes and not route:
+                self.log(' 1 '.center(40, '='))
             label = case.label
             if need_trace:
                 step = self.trace(route)
