@@ -151,12 +151,14 @@ class Flow(object):
             gv.writelines(edges)
             gv.write('}')
         _, img_type = os.path.splitext(img_path)
-        subprocess.call([graphviz, '-T{}'.format(img_type[1:]),
-            '-Efontname={}'.format(font),
-            '-Nfontname={}'.format(font),
-            '-o' + img_path, gv_path
-        ])
-
+        try:
+            subprocess.call([graphviz, '-T{}'.format(img_type[1:]),
+                '-Efontname={}'.format(font),
+                '-Nfontname={}'.format(font),
+                '-o' + img_path, gv_path
+            ])
+        except (IOError, OSError):
+            logger.error('GraphViz cannot be started: %s', graphviz)
 
 def make_square(items):
     stream = StringIO()
