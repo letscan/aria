@@ -6,7 +6,7 @@ Modeling
 Install
 -------
 ```
-pip install git+https://github.com/letscan/aria.git -U
+pip install -U aria
 ```
 
 Usage
